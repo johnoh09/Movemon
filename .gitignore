@@ -1,0 +1,164 @@
+# =========================
+# OS / Editor / General
+# =========================
+.DS_Store
+Thumbs.db
+*.swp
+*.swo
+*.orig
+*.tmp
+*.log
+logs/
+*.bak
+*.local
+.idea/
+.vscode/
+*.iml
+
+# Node (occasionally used by Flutter web or tools)
+node_modules/
+
+# =========================
+# Flutter / Dart
+# =========================
+.apps/**/.flutter-plugins
+.apps/**/.flutter-plugins-dependencies
+.apps/**/.packages
+.apps/**/.dart_tool/
+.apps/**/.pub/
+.apps/**/build/
+.apps/**/flutter_export_environment.sh
+# Keep pubspec.lock for apps (track dependencies deterministically)
+# (No ignore pattern for pubspec.lock)
+
+# If your Flutter app lives at apps/mobile_flutter:
+apps/mobile_flutter/.dart_tool/
+apps/mobile_flutter/.pub-cache/
+apps/mobile_flutter/.pub/
+apps/mobile_flutter/build/
+apps/mobile_flutter/ios/Flutter/.last_build_id
+
+# =========================
+# Android (Flutter)
+# =========================
+**/android/.gradle/
+**/android/.cxx/
+**/android/local.properties
+**/android/**/build/
+**/android/captures/
+**/android/*.keystore
+**/android/*.jks
+
+# =========================
+# iOS (Flutter)
+# =========================
+**/ios/Pods/
+**/ios/.symlinks/
+**/ios/Flutter/Flutter.framework/
+**/ios/Flutter/Flutter.podspec
+**/ios/Flutter/App.framework/
+**/ios/Flutter/Generated.xcconfig
+**/ios/ServiceDefinitions.json
+**/ios/Runner/GeneratedPluginRegistrant.*
+**/ios/DerivedData/
+**/ios/xcuserdata/
+**/*.mode1v3
+**/*.mode2v3
+**/*.perspectivev3
+**/*.xcuserstate
+# Keep Podfile.lock (do not ignore)
+
+# =========================
+# Python / FastAPI (services/api)
+# =========================
+*.pyc
+__pycache__/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+coverage.xml
+htmlcov/
+dist/
+build/
+.eggs/
+*.egg-info/
+.pdm-python
+.venv/
+venv/
+pip-wheel-metadata/
+.pyre/
+.pytype/
+.python-version
+
+# Env / Secrets (repo-wide)
+.env
+.env.*
+*.env
+*.envrc
+*.pem
+*.key
+*.crt
+*.p12
+*.jks
+
+# =========================
+# OpenAPI (generated artifacts)
+# =========================
+packages/openapi/generated/
+packages/openapi/build/
+packages/openapi/.openapi-generator/
+packages/openapi/*-client/
+packages/openapi/*-server/
+
+# =========================
+# Database (reference SQL is tracked)
+# =========================
+db/dumps/
+db/.tmp/
+# Alembic migration scripts should be tracked; don't ignore alembic/ by default.
+
+# =========================
+# Infrastructure
+# =========================
+# Docker
+docker-compose.override.yml
+**/.docker/
+**/docker/**/cache/
+**/docker/**/tmp/
+
+# K8s
+infra/**/kubeconfig
+infra/**/secrets.yaml
+infra/**/secret-*.yaml
+infra/**/*-secret.yaml
+infra/**/.kube/
+# If you use SealedSecrets, commit the sealed files (.yaml) but ignore raw secrets.
+
+# Helm
+**/charts/**/charts/
+**/charts/**/tmp/
+**/charts/**/manifests/
+**/charts/**/release.*
+**/*.tgz
+
+# Terraform
+**/.terraform/
+**/.terraform.lock.hcl
+**/terraform.tfstate
+**/terraform.tfstate.*
+**/crash.log
+**/override.tf
+**/override.tf.json
+**/*_override.tf
+**/*_override.tf.json
+
+# =========================
+# Misc
+# =========================
+# Local data/cache
+tmp/
+.cache/
+.cache-*/
+out/
+.target/
