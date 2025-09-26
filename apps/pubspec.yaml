@@ -7,18 +7,24 @@ environment:
   sdk: '>=3.2.3 <4.0.0'
 
 dependencies:
+  dio: ^5.7.0
+  flutter_secure_storage: ^9.2.2
+  intl: ^0.19.0
+  mime: ^1.0.5
+  path: ^1.9.0
+  http_parser: ^4.0.2
+  image_picker: ^1.1.2   # 선택: 갤러리/카메라
   flutter:
     sdk: flutter
-
   # For API calls
   http: ^1.2.1
-
   # For State management
   provider: ^6.1.2
   
   # For Icons
   cupertino_icons: ^1.0.2
-
+  percent_indicator: ^4.2.3
+  google_fonts: ^6.2.1
 dev_dependencies:
   flutter_test:
     sdk: flutter
@@ -26,3 +32,6 @@ dev_dependencies:
 
 flutter:
   uses-material-design: true
+  assets:
+    - assets/images/
+    - assets/images/charactor/

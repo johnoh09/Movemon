@@ -1,11 +1,13 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_diet_app/api/api_client.dart';
 import 'home/home_screen.dart';
 import 'workout/workout_screen.dart';
 import 'progress/my_progress_screen.dart';
 import 'settings/settings_screen.dart';
 
 class MainScreen extends StatefulWidget {
-  const MainScreen({super.key});
+  final ApiClient api; 
+  const MainScreen({super.key, required this.api});
 
   @override
   State<MainScreen> createState() => _MainScreenState();
@@ -23,7 +25,7 @@ class _MainScreenState extends State<MainScreen> {
       HomeScreen(onNavigate: _onItemTapped), // 홈 화면에 함수 전달
       const WorkoutScreen(),
       const MyProgressScreen(),
-      const SettingsScreen(),
+      SettingsScreen(api: widget.api),
     ];
   }
 
@@ -43,19 +45,19 @@ class _MainScreenState extends State<MainScreen> {
         items: const <BottomNavigationBarItem>[
           BottomNavigationBarItem(
             icon: Icon(Icons.home),
-            label: '홈',
+            label: 'Home',
           ),
           BottomNavigationBarItem(
             icon: Icon(Icons.fitness_center),
-            label: '운동',
+            label: 'Workout',
           ),
           BottomNavigationBarItem(
             icon: Icon(Icons.show_chart),
-            label: '내 성장',
+            label: 'Progress',
           ),
           BottomNavigationBarItem(
             icon: Icon(Icons.settings),
-            label: '설정',
+            label: 'Settings',
           ),
         ],
         currentIndex: _selectedIndex,

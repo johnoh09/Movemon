@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
+import 'package:flutter_diet_app/theme/app_colors.dart';
 
 class MyProgressScreen extends StatelessWidget {
   const MyProgressScreen({super.key});
@@ -9,14 +11,14 @@ class MyProgressScreen extends StatelessWidget {
       length: 4,
       child: Scaffold(
         appBar: AppBar(
-          title: const Text('내 성장'), // My Progress
+          title: Text('My Progress', style: GoogleFonts.bungee(fontWeight: FontWeight.bold, color: AppColors.darkText)), // My Progress
           bottom: const TabBar(
             isScrollable: true, // 탭이 많을 경우 스크롤 가능
             tabs: [
-              Tab(text: '캐릭터'),   // Character
-              Tab(text: '뱃지'),     // Badges
-              Tab(text: '목표 관리'), // Goal Management
-              Tab(text: '리포트'),   // Report
+              Tab(text: 'Character'),   // Character
+              Tab(text: 'Badges'),     // Badges
+              Tab(text: 'Goals'), // Goal Management
+              Tab(text: 'Reports'),   // Report
             ],
           ),
         ),
@@ -36,18 +38,22 @@ class MyProgressScreen extends StatelessWidget {
 // 1. 캐릭터 상세 뷰
 class CharacterDetailView extends StatelessWidget {
   const CharacterDetailView({super.key});
-
   @override
   Widget build(BuildContext context) {
+  const characterImage = 'assets/images/man.png';
+
     return SingleChildScrollView(
       padding: const EdgeInsets.all(16.0),
       child: Column(
         children: [
-          const Text("현재 캐릭터", style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
+          const Text("My Movemon", style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
           const SizedBox(height: 16),
-          const Icon(Icons.directions_run, size: 120, color: Colors.teal),
+          Image.asset(
+              characterImage,
+              height: 200, // 캐릭터 크기를 키움
+            ),
           const SizedBox(height: 16),
-          const Text("LV.4 러너", style: TextStyle(fontSize: 18)),
+          const Text("Lv. 4 Runner", style: TextStyle(fontSize: 18)),
           const SizedBox(height: 24),
           Card(
             child: Padding(
@@ -55,22 +61,22 @@ class CharacterDetailView extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Text("진화 조건", style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+                  const Text("Evo Quests", style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
                   const Divider(),
                   const ListTile(
                     leading: Icon(Icons.check_circle_outline, color: Colors.green),
-                    title: Text("5일 연속 운동하기 (완료)"),
+                    title: Text("Streak ×5 — Cleared!"),
                   ),
                   ListTile(
                     leading: Icon(Icons.radio_button_unchecked, color: Colors.grey),
-                    title: Text("누적 1000kcal 소모하기 (850/1000 kcal)"),
+                    title: Text("Total Burn 850/1,000 kcal"),
                   ),
                   const SizedBox(height: 12),
-                  const Text("퇴화 조건", style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+                  const Text("De-evolution Trigger", style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
                   const Divider(),
                   const ListTile(
                     leading: Icon(Icons.warning_amber_rounded, color: Colors.orange),
-                    title: Text("7일 이상 운동 기록이 없는 경우"),
+                    title: Text("No workouts logged for 7+ days"),
                   ),
                 ],
               ),
@@ -82,7 +88,7 @@ class CharacterDetailView extends StatelessWidget {
   }
 }
 
-// 2. 뱃지 갤러리 뷰
+// 2. Badge 갤러리 뷰
 class BadgeGalleryView extends StatelessWidget {
   const BadgeGalleryView({super.key});
 
@@ -97,7 +103,7 @@ class BadgeGalleryView extends StatelessWidget {
         crossAxisSpacing: 16,
         mainAxisSpacing: 16,
       ),
-      itemCount: 9, // 획득한 뱃지 + 미획득 뱃지
+      itemCount: 9, // 획득한 Badge + Locked Badge
       itemBuilder: (context, index) {
         bool isEarned = index < earnedBadges;
         return Column(
@@ -110,7 +116,7 @@ class BadgeGalleryView extends StatelessWidget {
             ),
             const SizedBox(height: 8),
             Text(
-              isEarned ? '뱃지 ${index + 1}' : '미획득',
+              isEarned ? 'Badge ${index + 1}' : 'Locked',
               style: TextStyle(color: isEarned ? Colors.black : Colors.grey),
             ),
           ],
@@ -129,28 +135,28 @@ class GoalManagementView extends StatelessWidget {
     return ListView(
       padding: const EdgeInsets.all(16.0),
       children: [
-        const Text("현재 목표", style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+        const Text("Current Goal", style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
         Card(
           child: ListTile(
-            title: const Text('주 3회 운동하기'),
+            title: const Text('Work out 3 times a week'),
             subtitle: const LinearProgressIndicator(value: 0.66, minHeight: 6),
             trailing: const Text("2/3"),
             onTap: () { /* 목표 수정 화면으로 이동 */ },
           ),
         ),
         const SizedBox(height: 24),
-        const Text("과거 목표 기록", style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+        const Text("Goal History", style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
         Card(
           child: ListTile(
             leading: const Icon(Icons.check_circle, color: Colors.green),
-            title: const Text('체지방 2kg 감량 (성공)'),
+            title: const Text('Lose 2 kg body fat (Success)'),
             subtitle: const Text('2025.07.01 ~ 2025.07.31'),
           ),
         ),
         Card(
           child: ListTile(
             leading: const Icon(Icons.cancel, color: Colors.red),
-            title: const Text('하루 30분 달리기 (실패)'),
+            title: const Text('30-minute run daily (Fail)'),
             subtitle: const Text('2025.06.01 ~ 2025.06.30'),
           ),
         ),
@@ -169,7 +175,7 @@ class DataReportView extends StatelessWidget {
       child: Padding(
         padding: EdgeInsets.all(16.0),
         child: Text(
-          '주간/월간 운동 통계 및 체중 변화 그래프가 여기에 표시됩니다.',
+          'Weekly/Monthly workout stats and weight-change charts will appear here.',
           textAlign: TextAlign.center,
           style: TextStyle(fontSize: 16, color: Colors.grey),
         ),

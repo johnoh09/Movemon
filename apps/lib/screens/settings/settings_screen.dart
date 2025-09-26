@@ -1,21 +1,49 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_diet_app/api/api_client.dart';
+import 'package:flutter_diet_app/auth_repo.dart';
 
 class SettingsScreen extends StatelessWidget {
-  const SettingsScreen({super.key});
+  final ApiClient api;
+  const SettingsScreen({super.key, required this.api});
+  Future<void> _logout(BuildContext context) async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (_) => AlertDialog(
+        title: const Text('Log out'),
+        content: const Text('Are you sure you want to log out?'),
+        actions: [
+          TextButton(onPressed: () => Navigator.pop(context, false), child: const Text('cancel')),
+          TextButton(onPressed: () => Navigator.pop(context, true), child: const Text('logout')),
+        ],
+      ),
+    );
+    if (confirmed != true) return;
+
+    await AuthRepo(api).logout(); // 토큰/세션 클리어 (api.auth.clear())
+
+    if (context.mounted) {
+      // 현재 스택 제거하고 로그인으로
+      Navigator.of(context).pushNamedAndRemoveUntil('/login', (route) => false);
+      // 메시지(optional)
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('You have successfully logged out')),
+      );
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('설정'), // Settings
+        title: const Text('Settings'), // Settings
       ),
       body: ListView(
         children: [
           // Account Settings
           const ListTile(
             leading: Icon(Icons.person_outline),
-            title: Text('계정 설정'),
-            subtitle: Text('프로필 정보 수정, 비밀번호 변경'),
+            title: Text('Account Settings'),
+            subtitle: Text('Update profile info, change password'),
             trailing: Icon(Icons.arrow_forward_ios, size: 16),
             onTap: null, // Navigate to account settings
           ),
@@ -23,8 +51,8 @@ class SettingsScreen extends StatelessWidget {
           // Notification Settings
           SwitchListTile(
             secondary: const Icon(Icons.notifications_outlined),
-            title: const Text('운동 알림'),
-            subtitle: const Text('지정한 시간에 운동 알림 받기'),
+            title: const Text('Workout Reminders'),
+            subtitle: const Text('Receive workout reminders at scheduled times'),
             value: true, // This should be managed by a state provider
             onChanged: (bool value) {
               // Handle notification setting change
@@ -32,7 +60,7 @@ class SettingsScreen extends StatelessWidget {
           ),
           SwitchListTile(
             secondary: const Icon(Icons.celebration_outlined),
-            title: const Text('뱃지/캐릭터 변경 알림'),
+            title: const Text('Badge/Character Alerts'),
             value: true,
             onChanged: (bool value) {
               // Handle badge/character notification setting change
@@ -42,29 +70,29 @@ class SettingsScreen extends StatelessWidget {
           // Other Menus
           const ListTile(
             leading: Icon(Icons.shield_outlined),
-            title: Text('개인 정보 보호 및 약관'),
+            title: Text('Privacy Policy & Terms'),
             trailing: Icon(Icons.arrow_forward_ios, size: 16),
             onTap: null, // Navigate to privacy policy
           ),
           const ListTile(
             leading: Icon(Icons.help_outline),
-            title: Text('도움말/FAQ'),
+            title: Text('Help / FAQ'),
             trailing: Icon(Icons.arrow_forward_ios, size: 16),
             onTap: null, // Navigate to FAQ
           ),
           const ListTile(
             leading: Icon(Icons.info_outline),
-            title: Text('앱 정보'),
-            subtitle: Text('버전 1.0.0'),
+            title: Text('About'),
+            subtitle: Text('Version 1.0.0'),
             trailing: Icon(Icons.arrow_forward_ios, size: 16),
             onTap: null, // Show app info dialog
           ),
            const Divider(),
            ListTile(
             leading: const Icon(Icons.logout, color: Colors.red),
-            title: const Text('로그아웃', style: TextStyle(color: Colors.red)),
+            title: const Text('Log out', style: TextStyle(color: Colors.red)),
             onTap: () {
-              // Handle logout
+                _logout(context);
             },
           ),
         ],

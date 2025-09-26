@@ -1,7 +1,10 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
+// 1. 위에서 만든 app_colors.dart 파일을 import 합니다.
+// '다이어트앱' 부분은 실제 프로젝트 이름(pubspec.yaml의 name)에 맞게 수정하세요.
+import 'package:flutter_diet_app/theme/app_colors.dart';
 
-// StatefulWidget으로 변경하여 타이머 상태 관리
 class WorkoutScreen extends StatefulWidget {
   const WorkoutScreen({super.key});
 
@@ -10,13 +13,17 @@ class WorkoutScreen extends StatefulWidget {
 }
 
 class _WorkoutScreenState extends State<WorkoutScreen> {
-  // 타이머 상태 변수
-  Stopwatch _stopwatch = Stopwatch();
+  final Stopwatch _stopwatch = Stopwatch();
   Timer? _timer;
   String _displayTime = '00:00:00';
 
+  @override
+  void dispose() {
+    _timer?.cancel();
+    super.dispose();
+  }
+
   void _startTimer() {
-    // 1초마다 화면을 갱신
     _timer = Timer.periodic(const Duration(seconds: 1), (timer) {
       if (_stopwatch.isRunning) {
         setState(() {
@@ -31,7 +38,7 @@ class _WorkoutScreenState extends State<WorkoutScreen> {
     if (_stopwatch.isRunning) {
       _stopwatch.stop();
       _timer?.cancel();
-      setState(() {}); // 버튼 상태 갱신을 위해 호출
+      setState(() {});
     }
   }
 
@@ -44,52 +51,44 @@ class _WorkoutScreenState extends State<WorkoutScreen> {
     });
   }
 
-  // 밀리초를 hh:mm:ss 형식으로 변환
   String _formatTime(int milliseconds) {
-    int secs = (milliseconds / 1000).truncate();
-    int hours = (secs / 3600).truncate();
-    secs = (secs % 3600).truncate();
-    int mins = (secs / 60).truncate();
-    secs = (secs % 60).truncate();
-
-    String hoursStr = (hours).toString().padLeft(2, '0');
-    String minsStr = (mins).toString().padLeft(2, '0');
-    String secsStr = (secs).toString().padLeft(2, '0');
-
-    return "$hoursStr:$minsStr:$secsStr";
-  }
-
-  @override
-  void dispose() {
-    _timer?.cancel(); // 화면이 꺼질 때 타이머 정리
-    super.dispose();
+    final duration = Duration(milliseconds: milliseconds);
+    String twoDigits(int n) => n.toString().padLeft(2, '0');
+    final hours = twoDigits(duration.inHours);
+    final minutes = twoDigits(duration.inMinutes.remainder(60));
+    final seconds = twoDigits(duration.inSeconds.remainder(60));
+    return "$hours:$minutes:$seconds";
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: AppColors.background,
       appBar: AppBar(
-        title: const Text('운동'),
+        title: Text('Workout', style: GoogleFonts.bungee(fontWeight: FontWeight.bold, color: AppColors.darkText)),
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+        iconTheme: const IconThemeData(color: AppColors.darkText),
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            _buildTimerCard(), // 타이머 카드
+            _buildTimerCard(),
             const SizedBox(height: 24),
-            const Text(
-              '수동으로 기록하기',
-              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+            Text(
+              'Manual Entry',
+              style: GoogleFonts.nunito(fontSize: 18, fontWeight: FontWeight.bold, color: AppColors.darkText),
             ),
             const SizedBox(height: 8),
-            _buildManualInputForm(), // 수동 입력 폼
+            _buildManualInputForm(),
             const SizedBox(height: 24),
-            const Text(
-              '최근 운동 기록',
-              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+            Text(
+              'Recent Activity',
+              style: GoogleFonts.nunito(fontSize: 18, fontWeight: FontWeight.bold, color: AppColors.darkText),
             ),
-            _buildWorkoutHistory(), // 운동 기록 리스트
+            _buildWorkoutHistory(),
           ],
         ),
       ),
@@ -98,49 +97,42 @@ class _WorkoutScreenState extends State<WorkoutScreen> {
 
   Widget _buildTimerCard() {
     return Card(
-      elevation: 4,
+      elevation: 2,
+      color: Colors.white,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
       child: Padding(
         padding: const EdgeInsets.all(20.0),
         child: Column(
           children: [
-            const Text(
-              '운동 타이머',
-              style: TextStyle(fontSize: 20, fontWeight: FontWeight.w600),
-            ),
+            Text('Workout Timer', style: GoogleFonts.nunito(fontSize: 20, fontWeight: FontWeight.w600, color: AppColors.darkText)),
             const SizedBox(height: 20),
             Text(
               _displayTime,
-              style: const TextStyle(
-                fontSize: 56,
-                fontWeight: FontWeight.bold,
-                fontFamily: 'monospace', // 숫자 폰트 고정 폭으로 설정
-              ),
+              style: TextStyle(fontSize: 56, fontWeight: FontWeight.bold, fontFamily: 'monospace', color: AppColors.darkText),
             ),
             const SizedBox(height: 20),
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: [
-                // 시작/일시정지 버튼
                 if (!_stopwatch.isRunning)
-                  ElevatedButton.icon(
-                    icon: const Icon(Icons.play_arrow),
-                    label: const Text('시작'),
+                  _buildTimerButton(
+                    icon: Icons.play_arrow,
+                    label: 'Start',
                     onPressed: _startTimer,
-                    style: ElevatedButton.styleFrom(backgroundColor: Colors.green),
+                    color: AppColors.primaryRed,
                   )
                 else
-                  ElevatedButton.icon(
-                    icon: const Icon(Icons.pause),
-                    label: const Text('일시정지'),
+                  _buildTimerButton(
+                    icon: Icons.pause,
+                    label: 'Pause',
                     onPressed: _pauseTimer,
-                    style: ElevatedButton.styleFrom(backgroundColor: Colors.orange),
+                    color: AppColors.primaryOrange,
                   ),
-                // 초기화 버튼
-                ElevatedButton.icon(
-                  icon: const Icon(Icons.stop),
-                  label: const Text('초기화'),
+                _buildTimerButton(
+                  icon: Icons.stop,
+                  label: 'Reset',
                   onPressed: _resetTimer,
-                  style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
+                  color: AppColors.darkText,
                 ),
               ],
             ),
@@ -149,30 +141,45 @@ class _WorkoutScreenState extends State<WorkoutScreen> {
       ),
     );
   }
-  
+
+  Widget _buildTimerButton({required IconData icon, required String label, required VoidCallback onPressed, required Color color}) {
+    return ElevatedButton.icon(
+      icon: Icon(icon, size: 20),
+      label: Text(label),
+      onPressed: onPressed,
+      style: ElevatedButton.styleFrom(
+        backgroundColor: color,
+        foregroundColor: Colors.white,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+      ),
+    );
+  }
+
   Widget _buildManualInputForm() {
-    return const Card(
+    return Card(
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+      elevation: 2,
+      color: Colors.white,
       child: Padding(
-        padding: EdgeInsets.all(16.0),
+        padding: const EdgeInsets.all(16.0),
         child: Column(
           children: [
-            TextField(
-              decoration: InputDecoration(labelText: '운동 종류 (예: 달리기)'),
-            ),
-            SizedBox(height: 10),
-            TextField(
-              decoration: InputDecoration(labelText: '운동 시간 (분)'),
-              keyboardType: TextInputType.number,
-            ),
-            SizedBox(height: 10),
-            TextField(
-              decoration: InputDecoration(labelText: '소모 칼로리 (kcal)'),
-              keyboardType: TextInputType.number,
-            ),
-            SizedBox(height: 20),
+            const TextField(decoration: InputDecoration(labelText: ' Workout Type (e.g., Running)')),
+            const SizedBox(height: 10),
+            const TextField(decoration: InputDecoration(labelText: 'Duration (min)'), keyboardType: TextInputType.number),
+            const SizedBox(height: 10),
+            const TextField(decoration: InputDecoration(labelText: 'Calories Burned (kcal)'), keyboardType: TextInputType.number),
+            const SizedBox(height: 20),
             ElevatedButton(
-              onPressed: null, // Logic to save manual entry
-              child: Text('기록 저장'),
+              onPressed: () { /* TODO: 기록 저장 로직 구현 */ },
+              style: ElevatedButton.styleFrom(
+                backgroundColor: AppColors.primaryBlue,
+                foregroundColor: Colors.white,
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                minimumSize: const Size(double.infinity, 48), // 버튼 너비 최대로
+              ),
+              child: const Text('Save'),
             ),
           ],
         ),
@@ -181,14 +188,29 @@ class _WorkoutScreenState extends State<WorkoutScreen> {
   }
 
   Widget _buildWorkoutHistory() {
-    return const Card(
+    return Card(
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+      elevation: 2,
+      color: Colors.white,
+      clipBehavior: Clip.antiAlias, 
+      child: InkWell(
+            // 1. 클릭 효과 색상 (물결 효과)
+      splashColor: AppColors.primaryBlue.withOpacity(0.1),
+      // 2. 하이라이트 색상 (누르고 있을 때)
+      highlightColor: AppColors.primaryBlue.withOpacity(0.05),
+      // 3. onTap 콜백 함수 (이것이 있어야 InkWell이 활성화됩니다)
+      onTap: () {
+        print('Workout history tapped!');
+        // TODO: 기록 상세 보기로 이동
+      },
       child: ListTile(
-        leading: Icon(Icons.run_circle_outlined, color: Colors.blue),
-        title: Text('30분 달리기'),
-        subtitle: Text('어제 - 250 kcal 소모'),
-        trailing: Icon(Icons.arrow_forward_ios),
+        leading: const Icon(Icons.run_circle_outlined, color: AppColors.primaryBlue, size: 30),
+        title: Text('30 min run', style: TextStyle(color: AppColors.darkText, fontWeight: FontWeight.bold)),
+        subtitle: Text('Yesterday · 250 kcal burned', style: TextStyle(color: AppColors.lightText)),
+        trailing: const Icon(Icons.arrow_forward_ios, size: 16, color: AppColors.lightText),
+        onTap: () { /* TODO: 기록 상세 보기로 이동 */ },
+      ),
       ),
     );
   }
 }
-
