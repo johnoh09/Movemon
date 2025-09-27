@@ -14,3 +14,9 @@ class WorkoutOut(OrmBase):
     sports_id: int
     duration_sec: int
     workout_at: datetime
+
+class WorkoutUpdate(BaseModel):
+    sports_id: Optional[int] = None
+    duration_sec: Optional[int] = None
+    workout_at: Optional[datetime] = None
+

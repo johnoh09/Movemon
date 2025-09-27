@@ -11,7 +11,7 @@ class Settings(BaseSettings):
     app_port: int = 8000
     allowed_origins: List[str] = ["*"]
     log_level: str = "INFO"
-    database_url: str = "postgresql+asyncpg://dabinkim:binglee@localhost:5432/postgres"
+    database_url: str = ""
     auto_create_db: bool = False
 
     # JWT

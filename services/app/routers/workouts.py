@@ -6,6 +6,7 @@ from sqlalchemy import select, and_
 from app.db.session import get_session
 from app.models.workout import Workout
 from app.deps.auth import get_current_user, CurrentUser
+from pydantic import BaseModel
 
 router = APIRouter(prefix="/workouts", tags=["workouts"])
 
@@ -88,3 +89,39 @@ async def delete_workout(
         raise HTTPException(status_code=404, detail="Workout not found")
     await db.delete(w)
     await db.commit()
+
+class WorkoutUpdate(BaseModel):
+    sports_id: int | None = None
+    duration_sec: int | None = None
+    workout_at: datetime | None = None
+
+@router.patch("/{workout_id}")
+async def update_workout(
+    workout_id: int,
+    payload: WorkoutUpdate,
+    user: CurrentUser = Depends(get_current_user),
+    db: AsyncSession = Depends(get_session),
+):
+    res = await db.execute(
+        select(Workout).where(and_(Workout.id == workout_id, Workout.user_id == user.id))
+    )
+    w = res.scalar_one_or_none()
+    if not w:
+        raise HTTPException(status_code=404, detail="Workout not found")
+
+    if payload.sports_id is not None:
+        w.sports_id = payload.sports_id
+    if payload.duration_sec is not None:
+        w.duration_sec = payload.duration_sec
+    if payload.workout_at is not None:
+        w.workout_at = payload.workout_at
+
+    db.add(w)
+    await db.commit()
+    await db.refresh(w)
+    return {
+        "id": w.id,
+        "sports_id": w.sports_id,
+        "duration_sec": w.duration_sec,
+        "workout_at": w.workout_at.isoformat(),
+    }

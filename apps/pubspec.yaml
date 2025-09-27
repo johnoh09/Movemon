@@ -20,7 +20,8 @@ dependencies:
   http: ^1.2.1
   # For State management
   provider: ^6.1.2
-  
+  flutter_local_notifications: ^17.1.2
+  timezone: ^0.9.2
   # For Icons
   cupertino_icons: ^1.0.2
   percent_indicator: ^4.2.3

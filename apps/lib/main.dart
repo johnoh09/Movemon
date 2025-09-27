@@ -9,9 +9,13 @@ import 'package:flutter_diet_app/api/api_client.dart';
 import 'package:flutter_diet_app/auth_repo.dart';
 import 'package:flutter_diet_app/pages/login_page.dart';
 import 'package:flutter_diet_app/pages/signup_page.dart';
+import 'package:flutter_diet_app/notifications/notification_service.dart';
 
-void main() {
-  // 에뮬레이터/환경에 맞춰 하나 선택
+
+
+Future<void> main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await NotificationService().init();
   final api = ApiClient.devAndroid();     // Android 에뮬레이터
   // final api = ApiClient.devIOS(userId: 1);      // iOS 시뮬레이터/맥
   runApp(MyApp(api: api));

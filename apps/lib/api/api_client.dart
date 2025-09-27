@@ -44,6 +44,14 @@ class ApiClient {
           }
           return handler.next(options);
         },
+        onError: (e, handler) async {
+          final status = e.response?.statusCode;
+          if (status == 401) {
+            // 인증 만료 등: 로컬 토큰 제거
+            await auth.clear();
+          }
+          return handler.next(e);
+        },
       ),
     );
   }
@@ -125,8 +133,157 @@ class ApiClient {
     final res = await dio.post('/workouts', data: payload);
     return Workout.fromJson(res.data as Map<String, dynamic>);
   }
+  Future<Workout> createWorkoutFromMap(Map<String, dynamic> payload) async {
+    final body = Map<String, dynamic>.from(payload);
 
+    final wa = body['workout_at'];
+    if (wa is DateTime) {
+      body['workout_at'] = wa.toUtc().toIso8601String();
+    }
+
+  final res = await dio.post('/workouts', data: body);
+  return Workout.fromJson(Map<String, dynamic>.from(res.data as Map));
+}
   Future<void> deleteWorkout(int workoutId) async {
     await dio.delete('/workouts/$workoutId');
+  }
+
+  // ------------------------
+// Goal APIs
+// ------------------------
+
+  /// 새 목표 생성
+  Future<Map<String, dynamic>> createGoal({
+    required String contents,
+    required DateTime startDate,
+    required DateTime endDate,
+    required int weeklySessions,
+    required int sessionMinutes,
+  }) async {
+    final res = await dio.post('/goals', data: {
+      'contents': contents,
+      'start_date': startDate.toIso8601String().split('T').first,
+      'end_date': endDate.toIso8601String().split('T').first,
+      'weekly_sessions': weeklySessions,
+      'session_minutes': sessionMinutes,
+    });
+    return Map<String, dynamic>.from(res.data as Map);
+  }
+
+  /// 현재 목표 조회 (진행률, 남은 기간 등 포함)
+  Future<Map<String, dynamic>> getCurrentGoal() async {
+    final res = await dio.get('/goals/current');
+    return Map<String, dynamic>.from(res.data as Map);
+  }
+
+  /// 과거 목표 목록 조회
+  Future<List<Map<String, dynamic>>> listGoals({int limit = 20}) async {
+    final res = await dio.get('/goals/history', queryParameters: {'limit': limit});
+    final data = res.data as List<dynamic>;
+    return data.cast<Map<String, dynamic>>();
+  }
+
+  /// 목표 상태 업데이트 (progress → success / fail)
+  Future<Map<String, dynamic>> updateGoalStatus({
+    required int goalId,
+    required String status,
+  }) async {
+    final res = await dio.patch('/goals/$goalId', data: {'status': status});
+    return Map<String, dynamic>.from(res.data as Map);
+  }
+
+  /// One-time goal edit
+  /// Backend enforces single edit via `edited_once` flag.
+  /// Accepts any subset of: weekly_sessions, session_minutes, start_date(YYYY-MM-DD), end_date(YYYY-MM-DD)
+  Future<Map<String, dynamic>> editGoal(int goalId, Map<String, dynamic> payload) async {
+    final res = await dio.patch('/goals/$goalId/edit', data: payload);
+    return Map<String, dynamic>.from(res.data as Map);
+  }
+
+  // ------------------------
+  // Character APIs
+  // ------------------------
+
+  /// 현재 캐릭터 상태 조회 (stage, streak_days, total_minutes 등)
+  Future<Map<String, dynamic>> getCharacter() async {
+    final res = await dio.get('/characters/me');
+    return Map<String, dynamic>.from(res.data as Map);
+  }
+
+  Future<List<Map<String, dynamic>>> getSports() async {
+    final res = await dio.get('/sports');
+    final raw = res.data as List;
+    return raw.map((e) => Map<String, dynamic>.from(e as Map)).toList();
+  }
+  Future<void> updateWorkoutFromMap(int workoutId, Map<String, dynamic> payload) async {
+    final body = Map<String, dynamic>.from(payload);
+    final wa = body['workout_at'];
+    if (wa is DateTime) {
+      body['workout_at'] = wa.toUtc().toIso8601String();
+    }
+    try {
+      await dio.patch('/workouts/$workoutId', data: body);
+    } on DioException catch (e) {
+      final status = e.response?.statusCode;
+      if (status == 405) {
+        await dio.put('/workouts/$workoutId', data: body);
+      } else {
+        rethrow;
+      }
+    }
+  }
+
+  // ------------------------
+  // Extra APIs: Goal History / Badges / Stats / Sports Map
+  // ------------------------
+  Future<List<Map<String, dynamic>>> getGoalHistory({int limit = 20, int offset = 0}) async {
+    try {
+      final res = await dio.get('/goals/history', queryParameters: {
+        'limit': limit,
+        'offset': offset,
+      });
+      final raw = res.data as List;
+      return raw.map((e) => Map<String, dynamic>.from(e as Map)).toList();
+    } on DioException catch (_) {
+      // Fallback: some servers expose archived goals under /goals
+      final res = await dio.get('/goals', queryParameters: {
+        'archived': true,
+        'limit': limit,
+        'offset': offset,
+      });
+      final raw = res.data as List;
+      return raw.map((e) => Map<String, dynamic>.from(e as Map)).toList();
+    }
+  }
+
+  Future<List<Map<String, dynamic>>> getBadges() async {
+    try {
+      final res = await dio.get('/badges');
+      final raw = res.data as List;
+      return raw.map((e) => Map<String, dynamic>.from(e as Map)).toList();
+    } on DioException catch (_) {
+      // Fallback endpoint
+      final res = await dio.get('/users/me/badges');
+      final raw = res.data as List;
+      return raw.map((e) => Map<String, dynamic>.from(e as Map)).toList();
+    }
+  }
+
+  /// period: 'weekly' | 'monthly'
+  Future<Map<String, dynamic>> getWorkoutStats({required String period}) async {
+    final res = await dio.get('/workouts/stats', queryParameters: {'period': period});
+    return Map<String, dynamic>.from(res.data as Map);
+  }
+
+  /// Convenience: map of sports id -> name
+  Future<Map<int, String>> getSportsMap() async {
+    final list = await getSports();
+    final map = <int, String>{};
+    for (final item in list) {
+      final id = (item['id'] as num?)?.toInt();
+      final name = (item['name'] ?? '').toString();
+      if (id != null && name.isNotEmpty) map[id] = name;
+    }
+    return map;
   }
 }
