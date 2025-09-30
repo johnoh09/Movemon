@@ -4,16 +4,18 @@ from typing import List, Literal
 
 class Settings(BaseSettings):
     app_name: str = "FastAPI Starter"
-    app_env: str = "dev" 
-    env: Literal["dev", "prod", "test"] = "dev"
+    app_env: str = "prod" 
+    env: Literal["dev", "prod", "test"] = "prod"
     sql_echo: bool = False
     app_host: str = "0.0.0.0"
     app_port: int = 8000
     allowed_origins: List[str] = ["*"]
     log_level: str = "INFO"
-    database_url: str = ""
+    # Do not hardcode secrets in code. Provide via .env or environment variable.
     auto_create_db: bool = False
-
+    DATABASE_URL: str
+    DB_SSL: bool = True
+    
     # JWT
     jwt_secret: str = "CHANGE_ME"       # 반드시 환경변수로 교체
     jwt_algorithm: str = "HS256"

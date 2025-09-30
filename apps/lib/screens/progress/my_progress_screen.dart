@@ -33,6 +33,7 @@ class _MyProgressScreenState extends State<MyProgressScreen> with SingleTickerPr
           _goalKey.currentState?._loadGoalHistory();
           _goalKey.currentState?._loadLastActivity();
         }
+        setState(() {}); // rebuild to reflect FAB visibility
       }
     });
     _loadSportsMap();
@@ -85,6 +86,14 @@ class _MyProgressScreenState extends State<MyProgressScreen> with SingleTickerPr
           const DataReportView(),
         ],
       ),
+      floatingActionButton: _tabController.index == 1
+          ? FloatingActionButton.extended(
+              onPressed: () => _goalKey.currentState?._openCreateGoal(),
+              icon: const Icon(Icons.add),
+              label: const Text('Goal'),
+            )
+          : null,
+      floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
     );
   }
 }
@@ -170,9 +179,15 @@ class _CharacterDetailViewState extends State<CharacterDetailView> with WidgetsB
     if (!_exercisedToday) return 'assets/images/oops_man.png';
     switch (_stage) {
       case 1:
-        return 'assets/images/charactor/m_1.png';
+        return 'assets/images/characters/m_1.png'; // 1레벨일 때
+      case 2:
+        return 'assets/images/characters/m_2.png';
+      case 3:
+        return 'assets/images/characters/m_3.png';
+      case 4:
+        return 'assets/images/characters/m_4.png';
       default:
-        return 'assets/images/move_man.png';
+        return 'assets/images/characters/m_5.png'; // 기본 이미지
     }
   }
 
@@ -194,7 +209,10 @@ class _CharacterDetailViewState extends State<CharacterDetailView> with WidgetsB
           children: [
             const Text("My Movemon", style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
             const SizedBox(height: 16),
-            Image.asset(characterImage, height: 200, fit: BoxFit.contain),
+            GestureDetector(
+              onTap: () => Navigator.of(context).pushNamed('/character'),
+              child: Image.asset(characterImage, height: 200, fit: BoxFit.contain),
+            ),
             const SizedBox(height: 16),
             Text('Lv. $_stage', style: const TextStyle(fontSize: 18)),
             const SizedBox(height: 24),
@@ -568,6 +586,220 @@ class _GoalManagementViewState extends State<GoalManagementView> with WidgetsBin
     );
   }
 
+  Future<void> _openCreateGoal() async {
+    // Prepare initial values
+    String contents = '';
+    int weekly = 3; // default convenient start
+    int minutes = 30; // default convenient start
+    DateTime? startDate;
+    DateTime? endDate;
+
+    await showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
+      ),
+      builder: (ctx) {
+        final bottomInset = MediaQuery.of(ctx).viewInsets.bottom;
+        return Padding(
+          padding: EdgeInsets.only(bottom: bottomInset),
+          child: StatefulBuilder(
+            builder: (ctx, setModal) {
+              Future<void> pickStart() async {
+                final base = startDate ?? DateTime.now();
+                final d = await showDatePicker(
+                  context: ctx,
+                  initialDate: base,
+                  firstDate: DateTime(2020),
+                  lastDate: DateTime(2100),
+                );
+                if (d != null) setModal(() => startDate = d);
+              }
+
+              Future<void> pickEnd() async {
+                final base = endDate ?? (startDate ?? DateTime.now());
+                final d = await showDatePicker(
+                  context: ctx,
+                  initialDate: base,
+                  firstDate: DateTime(2020),
+                  lastDate: DateTime(2100),
+                );
+                if (d != null) setModal(() => endDate = d);
+              }
+
+              return Padding(
+                padding: const EdgeInsets.all(16),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        const Text('Create Goal', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+                        IconButton(onPressed: () => Navigator.pop(ctx), icon: const Icon(Icons.close)),
+                      ],
+                    ),
+                    const SizedBox(height: 12),
+                    TextField(
+                      decoration: const InputDecoration(labelText: 'Title / contents (optional)'),
+                      onChanged: (v) => contents = v,
+                    ),
+                    const SizedBox(height: 12),
+                    // Weekly sessions – slider + quick chips
+                    const Align(
+                      alignment: Alignment.centerLeft,
+                      child: Text('Weekly sessions', style: TextStyle(fontWeight: FontWeight.w600)),
+                    ),
+                    const SizedBox(height: 6),
+                    Row(
+                      children: [
+                        IconButton(
+                          onPressed: () => setModal(() => weekly = (weekly - 1).clamp(1, 7)),
+                          icon: const Icon(Icons.remove_circle_outline),
+                        ),
+                        Expanded(
+                          child: Slider(
+                            min: 1,
+                            max: 7,
+                            divisions: 6,
+                            label: '$weekly/wk',
+                            value: weekly.toDouble(),
+                            onChanged: (v) => setModal(() => weekly = v.round()),
+                          ),
+                        ),
+                        IconButton(
+                          onPressed: () => setModal(() => weekly = (weekly + 1).clamp(1, 7)),
+                          icon: const Icon(Icons.add_circle_outline),
+                        ),
+                        const SizedBox(width: 8),
+                        Text('$weekly / wk'),
+                      ],
+                    ),
+                    Wrap(
+                      spacing: 8,
+                      children: [
+                        for (final v in const [1, 3, 5, 7])
+                          ChoiceChip(
+                            label: Text('$v/wk'),
+                            selected: weekly == v,
+                            onSelected: (s) => s ? setModal(() => weekly = v) : null,
+                          ),
+                      ],
+                    ),
+                    const SizedBox(height: 16),
+
+                    // Minutes per session – slider + quick chips
+                    const Align(
+                      alignment: Alignment.centerLeft,
+                      child: Text('Minutes per session', style: TextStyle(fontWeight: FontWeight.w600)),
+                    ),
+                    const SizedBox(height: 6),
+                    Row(
+                      children: [
+                        IconButton(
+                          onPressed: () => setModal(() => minutes = (minutes - 5).clamp(5, 120)),
+                          icon: const Icon(Icons.remove_circle_outline),
+                        ),
+                        Expanded(
+                          child: Slider(
+                            min: 10,
+                            max: 120,
+                            divisions: 22, // 10..120 step 5
+                            label: '$minutes min',
+                            value: minutes.toDouble(),
+                            onChanged: (v) => setModal(() => minutes = v.round()),
+                          ),
+                        ),
+                        IconButton(
+                          onPressed: () => setModal(() => minutes = (minutes + 5).clamp(10, 120)),
+                          icon: const Icon(Icons.add_circle_outline),
+                        ),
+                        const SizedBox(width: 8),
+                        Text('$minutes min'),
+                      ],
+                    ),
+                    Wrap(
+                      spacing: 8,
+                      children: [
+                        for (final v in const [20, 30, 45, 60])
+                          ChoiceChip(
+                            label: Text('$v min'),
+                            selected: minutes == v,
+                            onSelected: (s) => s ? setModal(() => minutes = v) : null,
+                          ),
+                      ],
+                    ),
+                    const SizedBox(height: 16),
+
+                    ListTile(
+                      contentPadding: EdgeInsets.zero,
+                      leading: const Icon(Icons.event),
+                      title: Text(startDate == null ? 'Start date' : startDate!.toLocal().toString().split('.').first),
+                      trailing: TextButton(onPressed: pickStart, child: const Text('Pick')),
+                    ),
+                    ListTile(
+                      contentPadding: EdgeInsets.zero,
+                      leading: const Icon(Icons.event_available),
+                      title: Text(endDate == null ? 'End date (optional, +4 weeks default)' : endDate!.toLocal().toString().split('.').first),
+                      trailing: TextButton(onPressed: pickEnd, child: const Text('Pick')),
+                    ),
+                    const SizedBox(height: 8),
+                    SizedBox(
+                      width: double.infinity,
+                      child: ElevatedButton(
+                        onPressed: () async {
+                          if (weekly < 1 || minutes < 1) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(content: Text('Please set weekly sessions and minutes per session')),
+                            );
+                            return;
+                          }
+                          if (startDate == null) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(content: Text('Please pick a start date')),
+                            );
+                            return;
+                          }
+                          // Default end date to +4 weeks when not selected
+                          final DateTime effectiveEndDate = endDate ?? startDate!.add(const Duration(days: 27));
+
+                          try {
+                            await apiClient.createGoal(
+                              contents: contents.trim(),
+                              startDate: startDate!,
+                              endDate: effectiveEndDate,
+                              weeklySessions: weekly,
+                              sessionMinutes: minutes,
+                            );
+                            if (!mounted) return;
+                            Navigator.pop(ctx);
+                            await _loadGoal();
+                            await _loadGoalHistory();
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(content: Text('Goal created')),
+                            );
+                          } catch (e) {
+                            if (!mounted) return;
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(content: Text('Failed: $e')),
+                            );
+                          }
+                        },
+                        child: const Text('Create'),
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                  ],
+                ),
+              );
+            },
+          ),
+        );
+      },
+    );
+  }
+
   String _fmt2(int n) => n.toString().padLeft(2, '0');
   String _fmtYmdHm(DateTime dt) {
     final t = dt.toLocal();
@@ -600,7 +832,7 @@ class _GoalManagementViewState extends State<GoalManagementView> with WidgetsBin
                 title: const Text('No active goal'),
                 subtitle: const Text('Create a goal to start tracking your progress'),
                 trailing: const Icon(Icons.arrow_forward_ios, size: 16),
-                onTap: () {},
+                onTap: _openCreateGoal,
               ),
             )
           else

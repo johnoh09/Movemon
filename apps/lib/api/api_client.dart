@@ -1,7 +1,8 @@
-// lib/api_client.dart
+// lib/api/api_client.dart
 import 'package:dio/dio.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import '../models/workout_model.dart';
+import 'package:flutter/foundation.dart';
 
 class AuthStore {
   const AuthStore();
@@ -28,11 +29,21 @@ class ApiClient {
           BaseOptions(
             baseUrl: baseUrl,                 // 예: http://10.0.2.2:8000/v1
             connectTimeout: const Duration(seconds: 10),
-            receiveTimeout: const Duration(seconds: 20),
+            receiveTimeout: const Duration(seconds: 45),
             headers: {'Content-Type': 'application/json'},
             responseType: ResponseType.json,
           ),
         ) {
+    if (kDebugMode) {
+      dio.interceptors.add(
+        LogInterceptor(
+          request: true,
+          requestBody: true,
+          responseBody: true,
+          responseHeader: false,
+        ),
+      );
+    }
     dio.interceptors.add(
       InterceptorsWrapper(
         onRequest: (options, handler) async {
@@ -46,6 +57,19 @@ class ApiClient {
         },
         onError: (e, handler) async {
           final status = e.response?.statusCode;
+          if (kDebugMode) {
+            final uri = e.requestOptions.uri;
+            final method = e.requestOptions.method;
+            final data = e.response?.data;
+            final serverMsg = (data is Map && (data['detail'] != null || data['message'] != null))
+                ? (data['detail'] ?? data['message']).toString()
+                : (data?.toString() ?? '');
+            // 개발 콘솔에 문제 구간을 명확히 노출
+            // 예: [API][ERROR] GET http://10.0.2.2:8000/v1/workouts => 500 Server blew up...
+            // 서버 로그와 상호 참조하기 좋게 출력
+            // ignore: avoid_print
+            print('[API][ERROR] $method $uri => $status $serverMsg');
+          }
           if (status == 401) {
             // 인증 만료 등: 로컬 토큰 제거
             await auth.clear();
@@ -57,12 +81,12 @@ class ApiClient {
   }
 
   /// 안드로이드 에뮬레이터
-  factory ApiClient.devAndroid({int? userId}) =>
-      ApiClient(baseUrl: 'http://10.0.2.2:8000/v1', auth: const AuthStore(), devUserId: userId);
+  factory ApiClient.devAndroid({int userId = 1}) =>
+      ApiClient(baseUrl: 'https://movemon-api-383546660777.asia-northeast3.run.app/v1', auth: const AuthStore(), devUserId: userId);
 
   /// iOS 시뮬레이터/맥
-  factory ApiClient.devIOS({int? userId}) =>
-      ApiClient(baseUrl: 'http://127.0.0.1:8000/v1', auth: const AuthStore(), devUserId: userId);
+  factory ApiClient.devIOS({int userId = 1}) =>
+      ApiClient(baseUrl: 'https://movemon-api-383546660777.asia-northeast3.run.app/v1', auth: const AuthStore(), devUserId: userId);
 
   // ------------------------
   // Auth APIs

@@ -14,7 +14,14 @@ logs/
 .idea/
 .vscode/
 *.iml
-
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.env
+.venv
+.git
+.gitignore
 # Node (occasionally used by Flutter web or tools)
 node_modules/
 

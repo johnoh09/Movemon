@@ -1,31 +1,47 @@
 # app/db/session.py
 from __future__ import annotations
-
-from typing import AsyncGenerator
-
+import os, ssl
+ 
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
-from sqlalchemy.pool import NullPool
 
 from app.core.config import settings
+
+
+# --- SSL 컨텍스트: Neon은 TLS 필수 ---
+ssl_ctx = None
+if "neon.tech" in settings.DATABASE_URL or os.getenv("DB_SSL", "false").lower() in ("1", "true", "yes"):
+    ssl_ctx = ssl.create_default_context()
+    ssl_ctx.check_hostname = True
+    ssl_ctx.verify_mode = ssl.CERT_REQUIRED
+
+connect_args = {}
+if ssl_ctx is not None:
+    connect_args["ssl"] = ssl_ctx
+    # NeonDB의 cold start를 대비해 연결 타임아웃을 30초로 늘립니다.
+    connect_args["timeout"] = 30
 
 # --- Engine ---
 # 운영: 기본 풀, 개발/테스트: NullPool(연결 누수 방지)
 engine = create_async_engine(
-    settings.database_url,
-    echo=settings.sql_echo,               # bool, 설정에서 관리
+    settings.DATABASE_URL,
+    echo=settings.sql_echo,
     pool_pre_ping=True,
-    poolclass=NullPool if settings.env in {"test"} else None,
+    pool_size=5,
+    max_overflow=10,
+    connect_args=connect_args,
 )
+
 
 # --- Session factory ---
 SessionLocal = async_sessionmaker(
     bind=engine,
     class_=AsyncSession,
     expire_on_commit=False,
+    autoflush=False,
 )
 
 # --- FastAPI dependency ---
-async def get_session() -> AsyncGenerator[AsyncSession, None]:
+async def get_session():
     async with SessionLocal() as session:
         yield session
 
@@ -46,3 +62,4 @@ async def init_models() -> None:
 
 async def dispose_engine() -> None:
     await engine.dispose()
+

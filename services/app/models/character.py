@@ -1,4 +1,5 @@
 from __future__ import annotations
+from datetime import datetime
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from sqlalchemy import BigInteger, Text, Integer, TIMESTAMP, CheckConstraint, text
 from app.db.base import Base
@@ -12,9 +13,18 @@ class Character(Base):
     sex: Mapped[str] = mapped_column(GenderEnum, nullable=False)
     character_type: Mapped[str] = mapped_column(Text, nullable=False)
     img_url: Mapped[str] = mapped_column(Text, nullable=False)
-    created_at: Mapped[str] = mapped_column(TIMESTAMP(timezone=True), server_default=text("now()"), nullable=False)
-    updated_at: Mapped[str] = mapped_column(TIMESTAMP(timezone=True), server_default=text("now()"), nullable=False)
+    created_at: Mapped[datetime] = mapped_column(
+        TIMESTAMP(timezone=True), server_default=text("now()"), nullable=False
+    )
+    updated_at: Mapped[datetime] = mapped_column(
+        TIMESTAMP(timezone=True), server_default=text("now()"), nullable=False
+    )
 
-    user_characters: Mapped[list["UserCharacter"]] = relationship(back_populates="character", cascade="all, delete-orphan")
+    # 문자열로 타깃 모델 명시 (추론 실패 방지)
+    user_characters: Mapped[list["UserCharacter"]] = relationship(
+        "UserCharacter", back_populates="character", cascade="all, delete-orphan"
+    )
 
-    __table_args__ = (CheckConstraint("age BETWEEN 0 AND 120", name="ck_characters_age"),)
+    __table_args__ = (
+        CheckConstraint("age BETWEEN 0 AND 120", name="ck_characters_age"),
+    )
