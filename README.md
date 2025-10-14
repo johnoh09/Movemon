@@ -1,8 +1,40 @@
 # Movemon
 
-[](https://opensource.org/licenses/MIT)
+[![Download APK](https://img.shields.io/badge/Download-APK-blue)](https://drive.google.com/uc?export=download&amp;id=1qjLP6FMAj0vPLznzC0G3KaJ-nJ1uDsIQ)
 
-**Turn your workouts into a game. Your physical activity evolves your unique character!** Movemon is a gamified fitness application where you raise your own character based on your workout records. It aims to provide powerful motivation through a sense of accomplishment and fun for those who find it difficult to maintain a consistent exercise routine.
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+
+**Turn your workouts into a game. Your physical activity evolves your unique character!**
+[⬇️ Jump to APK download](#android-apk)
+
+## Table of Contents
+- [Android APK](#android-apk)
+- [Features](#-features)
+- [Tech Stack & Architecture](#-tech-stack--architecture)
+- [Getting Started](#-getting-started)
+- [Project Structure](#-project-structure)
+- [License](#-license)
+  
+
+Movemon is a gamified fitness application where you raise your own character based on your workout records. It aims to provide powerful motivation through a sense of accomplishment and fun for those who find it difficult to maintain a consistent exercise routine.
+
+<p align="left">
+  <img src="./snapshots/movemon2.gif" width="520" alt="Movemon demo" />
+</p>
+<p>
+  <a href="https://drive.google.com/uc?export=download&amp;id=1qjLP6FMAj0vPLznzC0G3KaJ-nJ1uDsIQ">
+    <img src="https://img.shields.io/badge/Download-APK-blue" alt="Download APK">
+  </a>
+</p>
+
+<br>
+
+## 📱 Android APK
+
+- **Direct download:** [Download APK (Google Drive)](https://drive.google.com/uc?export=download&amp;id=1qjLP6FMAj0vPLznzC0G3KaJ-nJ1uDsIQ)
+- **Open in Drive (preview):** https://drive.google.com/file/d/1qjLP6FMAj0vPLznzC0G3KaJ-nJ1uDsIQ/view?usp=sharing
+
+> **Note:** On first install, you may need to temporarily allow installation from **Unknown sources** (Settings → Apps → Special access → Install unknown apps → enable for the app you use to download). Turn it **off again after installation**.
 
 <br>
 
