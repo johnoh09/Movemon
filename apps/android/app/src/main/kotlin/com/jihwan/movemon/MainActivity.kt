@@ -1,4 +1,4 @@
-package com.example.flutter_diet_app
+package com.jihwan.movemon
 
 import io.flutter.embedding.android.FlutterActivity
 

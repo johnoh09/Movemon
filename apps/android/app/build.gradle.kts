@@ -20,14 +20,14 @@ val keystoreProperties = Properties().apply {
 
 android {
     // ⚠️ 필요 시 실제 배포용 패키지명으로 교체
-    namespace = "com.example.flutter_diet_app"
+    namespace = "com.jihwan.movemon"
 
     compileSdk = flutter.compileSdkVersion
     ndkVersion = flutter.ndkVersion
 
     defaultConfig {
         // ⚠️ 필요 시 실제 배포용 패키지명으로 교체
-        applicationId = "com.example.flutter_diet_app"
+        applicationId = "com.jihwan.movemon"
 
         minSdk = flutter.minSdkVersion
         targetSdk = flutter.targetSdkVersion
