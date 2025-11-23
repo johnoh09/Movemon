@@ -1,6 +1,20 @@
 # Movemon
 
-[![Download APK](https://img.shields.io/badge/Download-APK-blue)](https://drive.google.com/uc?export=download&amp;id=1qjLP6FMAj0vPLznzC0G3KaJ-nJ1uDsIQ)
+<div align="center">
+
+  <a href="https://github.com/johnoh09/Movemon/releases/tag/v1.0.0">
+    <img src="https://img.shields.io/badge/Download_APK-Movemon_v1.0.0-3DDC84?style=for-the-badge&logo=android&logoColor=white" alt="Download APK" />
+  </a>
+
+  <br/>
+  <br/>
+
+  > **⚠️ Note for Reviewers** <br/>
+  > **Movemon** is currently under final review by the **Google Play Store**. <br/>
+  > While we await approval, you can download the official APK file directly from **GitHub Releases** via the button above for portfolio evaluation. <br/>
+  > *(If prompted with a security warning during installation, please allow "Install from unknown sources" to proceed. This is required for apps not yet listed on the Play Store.)*
+
+</div>
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
